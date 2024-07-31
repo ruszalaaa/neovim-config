@@ -6,7 +6,7 @@ end)
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-	ensure_installed = {},
+	ensure_installed = {'jedi_language_server'},
 	handlers = {
 		lsp_zero.default_setup,
 	},
