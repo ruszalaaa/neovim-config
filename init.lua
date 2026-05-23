@@ -47,9 +47,6 @@ map('n', '<Esc>', ':nohlsearch<CR>', opts)
 map('n', '<leader>e', vim.diagnostic.open_float, opts)  -- Float for current line
 map('n', '<leader>d', vim.diagnostic.setqflist, opts)   -- All diagnostics in quickfix
 
--- LSP
-map('n', '<leader>ls', ':LspRestart<CR>', opts)  -- Restart LSP servers
-
 -- Bootstrap lazy.nvim plugin manager
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
