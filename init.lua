@@ -19,6 +19,9 @@ vim.opt.termguicolors = true       -- Enable true color support
 vim.opt.signcolumn = 'yes'         -- Always show sign column (for LSP diagnostics)
 vim.opt.updatetime = 250           -- Faster completion / diagnostics
 
+-- Color scheme
+vim.cmd.colorscheme('catppuccin')
+
 -- Leader key (must be set before plugins load)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
@@ -57,7 +60,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Plugins
 require('lazy').setup({
-  -- Mason 
+  -- Mason
   {
     'williamboman/mason.nvim',
     config = function()
@@ -104,6 +107,40 @@ require('lazy').setup({
         },
       })
       vim.lsp.enable({ 'lua_ls', 'pylsp' })
+    end,
+  },
+
+  -- Telescope (fuzzy finder)
+  {
+    'nvim-telescope/telescope.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      local telescope = require('telescope')
+      telescope.setup({
+        defaults = {
+          layout_strategy = 'horizontal',
+          layout_config = { width = 0.9, height = 0.8 },
+        },
+      })
+    end,
+    keys = {
+      { '<leader>ff', function() require('telescope.builtin').find_files() end, desc = 'Find files' },
+      { '<leader>fg', function() require('telescope.builtin').live_grep() end, desc = 'Live grep' },
+      { '<leader>fb', function() require('telescope.builtin').buffers() end, desc = 'Buffers' },
+      { '<leader>fh', function() require('telescope.builtin').help_tags() end, desc = 'Help tags' },
+    },
+  },
+
+  -- Tree Sitter
+  {
+    'nvim-treesitter/nvim-treesitter',
+    build = ':TSUpdate',
+    config = function()
+      require('nvim-treesitter.configs').setup({
+        ensure_installed = { 'lua', 'python', 'vim', 'markdown' },
+        highlight = { enable = true },
+        indent = { enable = true },
+      })
     end,
   },
 })
