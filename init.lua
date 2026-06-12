@@ -19,8 +19,6 @@ vim.opt.termguicolors = true       -- Enable true color support
 vim.opt.signcolumn = 'yes'         -- Always show sign column (for LSP diagnostics)
 vim.opt.updatetime = 250           -- Faster completion / diagnostics
 
--- Color scheme
-vim.cmd.colorscheme('catppuccin')
 
 -- Leader key (must be set before plugins load)
 vim.g.mapleader = ' '
@@ -72,7 +70,7 @@ require('lazy').setup({
     dependencies = { 'williamboman/mason.nvim' },
     config = function()
       require('mason-lspconfig').setup({
-        ensure_installed = { 'lua_ls', 'pylsp' },
+        ensure_installed = { 'lua_ls', 'pylsp', 'clangd' },
       })
     end,
   },
@@ -106,7 +104,7 @@ require('lazy').setup({
           },
         },
       })
-      vim.lsp.enable({ 'lua_ls', 'pylsp' })
+      vim.lsp.enable({ 'lua_ls', 'pylsp', 'clangd' })
     end,
   },
 
@@ -137,7 +135,7 @@ require('lazy').setup({
     build = ':TSUpdate',
     config = function()
       require('nvim-treesitter.configs').setup({
-        ensure_installed = { 'lua', 'python', 'vim', 'markdown' },
+        ensure_installed = { 'lua', 'python', 'vim', 'markdown', 'c', 'cpp' },
         highlight = { enable = true },
         indent = { enable = true },
       })
