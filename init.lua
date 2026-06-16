@@ -137,8 +137,16 @@ require('lazy').setup({
       require('nvim-treesitter.configs').setup({
         ensure_installed = { 'lua', 'python', 'vim', 'markdown', 'c', 'cpp' },
         highlight = { enable = true },
-        indent = { enable = true },
+        indent = { enable = true, disable = { 'c', 'cpp' } },
       })
     end,
   },
+})
+
+-- Use cindent for C/C++ files instead of treesitter
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'c', 'cpp' },
+  callback = function()
+    vim.opt_local.cindent = true
+  end,
 })
