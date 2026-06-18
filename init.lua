@@ -1,51 +1,63 @@
--- Neovim configuration
+-- neovim configuration
 
--- General settings
-vim.opt.number = true              -- Show line numbers
-vim.opt.relativenumber = true      -- Show relative line numbers
-vim.opt.expandtab = true           -- Use spaces instead of tabs
-vim.opt.tabstop = 2                -- Number of spaces per tab
-vim.opt.shiftwidth = 2             -- Number of spaces for indentation
-vim.opt.smartindent = true         -- Auto-indent new lines
-vim.opt.wrap = true                -- Wrap long lines
-vim.opt.ignorecase = true          -- Case-insensitive search
-vim.opt.smartcase = true           -- Case-sensitive if uppercase in search
-vim.opt.hlsearch = true            -- Highlight search results
-vim.opt.incsearch = true           -- Incremental search
-vim.opt.undofile = true            -- Persistent undo history
-vim.opt.hidden = true              -- Allow hidden buffers
-vim.opt.mouse = 'a'                -- Enable mouse support
-vim.opt.termguicolors = true       -- Enable true color support
-vim.opt.signcolumn = 'yes'         -- Always show sign column (for LSP diagnostics)
-vim.opt.updatetime = 250           -- Faster completion / diagnostics
+-- general settings
+vim.opt.number = true              -- show line numbers
+vim.opt.relativenumber = true      -- show relative line numbers
+vim.opt.expandtab = true           -- use spaces instead of tabs
+vim.opt.tabstop = 2                -- number of spaces per tab
+vim.opt.shiftwidth = 2             -- number of spaces for indentation
+vim.opt.smartindent = true         -- auto-indent new lines
+vim.opt.wrap = true                -- wrap long lines
+vim.opt.ignorecase = true          -- case-insensitive search
+vim.opt.smartcase = true           -- case-sensitive if uppercase in search
+vim.opt.hlsearch = true            -- highlight search results
+vim.opt.incsearch = true           -- incremental search
+vim.opt.undofile = true            -- persistent undo history
+vim.opt.hidden = true              -- allow hidden buffers
+vim.opt.mouse = 'a'                -- enable mouse support
+vim.opt.termguicolors = true       -- enable true color support
+vim.opt.signcolumn = 'yes'         -- always show sign column (for lsp diagnostics)
+vim.opt.updatetime = 250           -- faster completion / diagnostics
+
+-- hide lsp warnings, warnings are for weak
+vim.diagnostic.config({
+  severity_sort = true,
+  virtual_text = { severity = vim.diagnostic.severity.ERROR },
+  signs = { severity = vim.diagnostic.severity.ERROR },
+  underline = { severity = vim.diagnostic.severity.ERROR },
+})
 
 
--- Leader key (must be set before plugins load)
+-- leader key 
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- Key mappings
+-- key mappings
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- Navigate between windows
+-- navigate between windows
 map('n', '<leader>h', '<C-w>h', opts)
 map('n', '<leader>j', '<C-w>j', opts)
 map('n', '<leader>k', '<C-w>k', opts)
 map('n', '<leader>l', '<C-w>l', opts)
 
--- Save and quit shortcuts
+-- save and quit shortcuts
 map('n', '<leader>w', ':w<CR>', opts)
 map('n', '<leader>q', ':q<CR>', opts)
 
--- Clear search highlighting
+-- clear search highlighting
 map('n', '<Esc>', ':nohlsearch<CR>', opts)
 
--- Diagnostics
-map('n', '<leader>e', vim.diagnostic.open_float, opts)  -- Float for current line
-map('n', '<leader>d', vim.diagnostic.setqflist, opts)   -- All diagnostics in quickfix
+-- toggle comments 
+map('n', '<leader>/', 'gcc', { remap = true, desc = 'Toggle comment line' })
+map('x', '<leader>/', 'gc', { remap = true, desc = 'Toggle comment selection' })
 
--- Bootstrap lazy.nvim plugin manager
+-- diagnostics
+map('n', '<leader>e', vim.diagnostic.open_float, opts)  -- float for current line
+map('n', '<leader>d', vim.diagnostic.setqflist, opts)   -- all diagnostics in quickfix
+
+-- bootstrap lazy.nvim plugin manager
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   vim.fn.system({
@@ -56,9 +68,9 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Plugins
+-- plugins
 require('lazy').setup({
-  -- Mason
+  -- mason
   {
     'williamboman/mason.nvim',
     config = function()
@@ -75,7 +87,7 @@ require('lazy').setup({
     end,
   },
 
-  -- LSP configuration
+  -- lsp configuration
   {
     'neovim/nvim-lspconfig',
     dependencies = { 'williamboman/mason-lspconfig.nvim' },
@@ -83,16 +95,16 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('LspAttach', {
         callback = function(ev)
           local bufopts = { noremap = true, silent = true, buffer = ev.buf }
-          map('n', 'gd', vim.lsp.buf.definition, bufopts)      -- Go to definition
-          map('n', 'gD', vim.lsp.buf.declaration, bufopts)     -- Go to declaration
-          map('n', 'gr', vim.lsp.buf.references, bufopts)      -- List all references
-          map('n', 'gi', vim.lsp.buf.implementation, bufopts)  -- Go to implementation
-          map('n', 'K', vim.lsp.buf.hover, bufopts)            -- Show hover documentation
-          map('n', '<leader>rn', vim.lsp.buf.rename, bufopts)  -- Rename symbol under cursor
-          map('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)  -- Show code actions
-          map('n', '<leader>f', function() vim.lsp.buf.format({ async = true }) end, bufopts)  -- Format buffer
-          map('n', '[d', vim.diagnostic.goto_prev, bufopts)    -- Jump to previous diagnostic
-          map('n', ']d', vim.diagnostic.goto_next, bufopts)    -- Jump to next diagnostic
+          map('n', 'gd', vim.lsp.buf.definition, bufopts)      -- go to definition
+          map('n', 'gD', vim.lsp.buf.declaration, bufopts)     -- go to declaration
+          map('n', 'gr', vim.lsp.buf.references, bufopts)      -- list all references
+          map('n', 'gi', vim.lsp.buf.implementation, bufopts)  -- go to implementation
+          map('n', 'K', vim.lsp.buf.hover, bufopts)            -- show hover documentation
+          map('n', '<leader>rn', vim.lsp.buf.rename, bufopts)  -- rename symbol under cursor
+          map('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)  -- show code actions
+          map('n', '<leader>f', function() vim.lsp.buf.format({ async = true }) end, bufopts)  -- format buffer
+          map('n', '[d', vim.diagnostic.goto_prev, bufopts)    -- jump to previous diagnostic
+          map('n', ']d', vim.diagnostic.goto_next, bufopts)    -- jump to next diagnostic
         end,
       })
       vim.lsp.config('lua_ls', {
@@ -108,7 +120,7 @@ require('lazy').setup({
     end,
   },
 
-  -- Telescope (fuzzy finder)
+  -- telescope (fuzzy finder)
   {
     'nvim-telescope/telescope.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },
@@ -129,7 +141,7 @@ require('lazy').setup({
     },
   },
 
-  -- Tree Sitter
+  -- tree sitter
   {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
@@ -143,7 +155,7 @@ require('lazy').setup({
   },
 })
 
--- Use cindent for C/C++ files instead of treesitter
+-- c/c++ native vim indent 
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'c', 'cpp' },
   callback = function()
