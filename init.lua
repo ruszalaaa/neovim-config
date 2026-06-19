@@ -88,6 +88,7 @@ require('lazy').setup({
       })
     end,
   },
+
   -- modus color scheme
   {
     "miikanissi/modus-themes.nvim", priority = 1000,
@@ -100,11 +101,49 @@ require('lazy').setup({
     end,
   },
 
+  -- autocompletion
+  {
+    'hrsh7th/nvim-cmp',
+    dependencies = {
+      'hrsh7th/cmp-nvim-lsp',   -- lsp completion source
+      'hrsh7th/cmp-buffer',     -- words from current buffer
+      'hrsh7th/cmp-path',       -- filesystem paths
+    },
+    config = function()
+      local cmp = require('cmp')
+
+      cmp.setup({
+        completion = {
+          autocomplete = false,  -- don't pop up while typing; open manually with <C-Space>
+        },
+        mapping = cmp.mapping.preset.insert({
+          ['<C-Space>'] = cmp.mapping.complete(),              -- manually open the menu
+          ['<C-e>'] = cmp.mapping.abort(),                     -- close the menu
+          ['<C-y>'] = cmp.mapping.confirm({ select = true }),  -- accept selected item
+          ['<C-n>'] = cmp.mapping.select_next_item(),          -- next item
+          ['<C-p>'] = cmp.mapping.select_prev_item(),          -- previous item
+          ['<C-b>'] = cmp.mapping.scroll_docs(-4),             -- scroll docs up
+          ['<C-f>'] = cmp.mapping.scroll_docs(4),              -- scroll docs down
+        }),
+        sources = cmp.config.sources({
+          { name = 'nvim_lsp' },
+        }, {
+          { name = 'buffer' },
+          { name = 'path' },
+        }),
+      })
+    end,
+  },
+
   -- lsp configuration
   {
     'neovim/nvim-lspconfig',
-    dependencies = { 'williamboman/mason-lspconfig.nvim' },
+    dependencies = { 'williamboman/mason-lspconfig.nvim', 'hrsh7th/cmp-nvim-lsp' },
     config = function()
+      -- advertise cmp's extra completion capabilities to language servers
+      local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      vim.lsp.config('*', { capabilities = capabilities })
+
       vim.api.nvim_create_autocmd('LspAttach', {
         callback = function(ev)
           local bufopts = { noremap = true, silent = true, buffer = ev.buf }
