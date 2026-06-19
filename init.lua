@@ -2,7 +2,7 @@
 
 -- general settings
 vim.opt.number = true              -- show line numbers
-vim.opt.relativenumber = true      -- show relative line numbers
+vim.opt.relativenumber = false     -- absolute line numbers only
 vim.opt.expandtab = true           -- use spaces instead of tabs
 vim.opt.tabstop = 2                -- number of spaces per tab
 vim.opt.shiftwidth = 2             -- number of spaces for indentation
@@ -77,6 +77,8 @@ require('lazy').setup({
       require('mason').setup()
     end,
   },
+  
+  -- mason lsp
   {
     'williamboman/mason-lspconfig.nvim',
     dependencies = { 'williamboman/mason.nvim' },
@@ -84,6 +86,17 @@ require('lazy').setup({
       require('mason-lspconfig').setup({
         ensure_installed = { 'lua_ls', 'pylsp', 'clangd' },
       })
+    end,
+  },
+  -- modus color scheme
+  {
+    "miikanissi/modus-themes.nvim", priority = 1000,
+    opts = {
+      line_nr_column_background = false,  -- no gray bg behind line numbers
+      sign_column_background = false,     -- no gray bg in sign column
+    },
+    config = function(_, opts)
+      require('modus-themes').setup(opts)
     end,
   },
 
@@ -155,10 +168,44 @@ require('lazy').setup({
   },
 })
 
--- c/c++ native vim indent 
+-- c/c++ native vim indent
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'c', 'cpp' },
   callback = function()
     vim.opt_local.cindent = true
   end,
 })
+
+-- c compilation
+local function compile_c()
+  local file = vim.fn.expand('%')
+  local output = vim.fn.expand('%:r')
+  local cmd = string.format('gcc -o %s %s', output, file)
+
+  vim.fn.system(cmd)
+  local exit_code = vim.v.shell_error
+
+  if exit_code == 0 then
+    vim.notify('Compiled successfully: ' .. output, vim.log.levels.INFO)
+    return true
+  else
+    vim.notify('Compilation failed!', vim.log.levels.ERROR)
+    return false
+  end
+end
+
+local function run_c()
+  local output = vim.fn.expand('%:r')
+  vim.cmd('split')
+  vim.cmd('terminal ./' .. output)
+end
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'c',
+  callback = function()
+    map('n', '<leader>c', compile_c, { noremap = true, silent = true, buffer = true, desc = 'Compile C program' })
+    map('n', '<leader>r', run_c, { noremap = true, silent = true, buffer = true, desc = 'Run C program' })
+  end,
+})
+-- modus colorscheme
+vim.cmd([[colorscheme modus_vivendi]])
