@@ -193,15 +193,21 @@ require('lazy').setup({
     },
   },
 
-  -- tree sitter
+  -- tree sitter (main branch: new minimal API)
   {
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
     build = ':TSUpdate',
     config = function()
-      require('nvim-treesitter.configs').setup({
-        ensure_installed = { 'lua', 'python', 'vim', 'markdown', 'c', 'cpp' },
-        highlight = { enable = true },
-        indent = { enable = true, disable = { 'c', 'cpp' } },
+      local ensure_installed = { 'lua', 'python', 'vim', 'markdown', 'c', 'cpp' }
+      -- install missing parsers (async; no-op for already installed ones)
+      require('nvim-treesitter').install(ensure_installed)
+
+      -- enable treesitter highlighting for these filetypes
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = ensure_installed,
+        callback = function() pcall(vim.treesitter.start) end,
       })
     end,
   },
