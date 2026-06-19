@@ -89,18 +89,6 @@ require('lazy').setup({
     end,
   },
 
-  -- modus color scheme
-  {
-    "miikanissi/modus-themes.nvim", priority = 1000,
-    opts = {
-      line_nr_column_background = false,  -- no gray bg behind line numbers
-      sign_column_background = false,     -- no gray bg in sign column
-    },
-    config = function(_, opts)
-      require('modus-themes').setup(opts)
-    end,
-  },
-
   -- autocompletion
   {
     'hrsh7th/nvim-cmp',
@@ -111,24 +99,18 @@ require('lazy').setup({
     },
     config = function()
       local cmp = require('cmp')
-
       cmp.setup({
         completion = {
-          autocomplete = false,  -- don't pop up while typing; open manually with <C-Space>
+          completeopt = 'menu,menuone,noinsert',
         },
         mapping = cmp.mapping.preset.insert({
-          ['<C-Space>'] = cmp.mapping.complete(),              -- manually open the menu
-          ['<C-e>'] = cmp.mapping.abort(),                     -- close the menu
-          ['<C-y>'] = cmp.mapping.confirm({ select = true }),  -- accept selected item
-          ['<C-n>'] = cmp.mapping.select_next_item(),          -- next item
-          ['<C-p>'] = cmp.mapping.select_prev_item(),          -- previous item
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),             -- scroll docs up
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),              -- scroll docs down
+          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-e>'] = cmp.mapping.abort(),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }),
         }),
         sources = cmp.config.sources({
           { name = 'nvim_lsp' },
-        }, {
-          { name = 'buffer' },
           { name = 'path' },
         }),
       })
@@ -142,6 +124,8 @@ require('lazy').setup({
     config = function()
       -- advertise cmp's extra completion capabilities to language servers
       local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      -- don't let servers expand to func(args) snippets on accept; insert name only
+      capabilities.textDocument.completion.completionItem.snippetSupport = false
       vim.lsp.config('*', { capabilities = capabilities })
 
       vim.api.nvim_create_autocmd('LspAttach', {
@@ -252,5 +236,3 @@ vim.api.nvim_create_autocmd('FileType', {
     map('n', '<leader>r', run_c, { noremap = true, silent = true, buffer = true, desc = 'Run C program' })
   end,
 })
--- modus colorscheme
-vim.cmd([[colorscheme modus_vivendi]])
