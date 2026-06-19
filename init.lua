@@ -122,9 +122,7 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     dependencies = { 'williamboman/mason-lspconfig.nvim', 'hrsh7th/cmp-nvim-lsp' },
     config = function()
-      -- advertise cmp's extra completion capabilities to language servers
       local capabilities = require('cmp_nvim_lsp').default_capabilities()
-      -- don't let servers expand to func(args) snippets on accept; insert name only
       capabilities.textDocument.completion.completionItem.snippetSupport = false
       vim.lsp.config('*', { capabilities = capabilities })
 
@@ -177,7 +175,7 @@ require('lazy').setup({
     },
   },
 
-  -- tree sitter (main branch: new minimal API)
+  -- tree sitter 
   {
     'nvim-treesitter/nvim-treesitter',
     branch = 'main',
@@ -185,10 +183,8 @@ require('lazy').setup({
     build = ':TSUpdate',
     config = function()
       local ensure_installed = { 'lua', 'python', 'vim', 'markdown', 'c', 'cpp' }
-      -- install missing parsers (async; no-op for already installed ones)
       require('nvim-treesitter').install(ensure_installed)
 
-      -- enable treesitter highlighting for these filetypes
       vim.api.nvim_create_autocmd('FileType', {
         pattern = ensure_installed,
         callback = function() pcall(vim.treesitter.start) end,
