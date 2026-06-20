@@ -20,7 +20,7 @@ vim.opt.signcolumn = 'yes'         -- always show sign column (for lsp diagnosti
 vim.opt.updatetime = 250           -- faster completion / diagnostics
 
 
--- hide lsp warnings, warnings are for weak
+-- hide lsp warnings
 vim.diagnostic.config({
   severity_sort = true,
   virtual_text = { severity = vim.diagnostic.severity.ERROR },
@@ -37,26 +37,8 @@ vim.g.maplocalleader = ' '
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- navigate between windows
-map('n', '<leader>h', '<C-w>h', opts)
-map('n', '<leader>j', '<C-w>j', opts)
-map('n', '<leader>k', '<C-w>k', opts)
-map('n', '<leader>l', '<C-w>l', opts)
-
--- save and quit shortcuts
-map('n', '<leader>w', ':w<CR>', opts)
-map('n', '<leader>q', ':q<CR>', opts)
-
 -- clear search highlighting
 map('n', '<Esc>', ':nohlsearch<CR>', opts)
-
--- toggle comments 
-map('n', '<leader>/', 'gcc', { remap = true, desc = 'Toggle comment line' })
-map('x', '<leader>/', 'gc', { remap = true, desc = 'Toggle comment selection' })
-
--- diagnostics
-map('n', '<leader>e', vim.diagnostic.open_float, opts)  -- float for current line
-map('n', '<leader>d', vim.diagnostic.setqflist, opts)   -- all diagnostics in quickfix
 
 -- bootstrap lazy.nvim plugin manager
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
@@ -71,7 +53,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- plugins
 require('lazy').setup({
-  -- modus-themes colorscheme
+  -- modus-themes
   {
     'miikanissi/modus-themes.nvim',
     lazy = false,
@@ -79,10 +61,9 @@ require('lazy').setup({
     config = function()
       require('modus-themes').setup({
         style = 'modus_vivendi',
-        dim_inactive = true,
-        on_highlights = function(hl, c)
-          hl.Visual = { bg = c.bg_dim }
-        end,
+        styles = {
+          keywords = { italic = false },
+        }
       })
       vim.cmd('colorscheme modus')
     end,
@@ -123,14 +104,15 @@ require('lazy').setup({
           completeopt = 'menu,menuone',
         },
         mapping = cmp.mapping.preset.insert({
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
           ['<C-Space>'] = cmp.mapping.complete(),
           ['<C-e>'] = cmp.mapping.abort(),
           ['<CR>'] = cmp.mapping.confirm({ select = false }),
+          ['<Tab>'] = cmp.mapping.select_next_item(),       -- next completion item
+          ['<S-Tab>'] = cmp.mapping.select_prev_item(),     -- previous completion item
         }),
         sources = cmp.config.sources({
           { name = 'nvim_lsp' },
+          { name = 'buffer' },
           { name = 'path' },
         }),
       })
@@ -145,20 +127,17 @@ require('lazy').setup({
       local capabilities = require('cmp_nvim_lsp').default_capabilities()
       capabilities.textDocument.completion.completionItem.snippetSupport = false
       vim.lsp.config('*', { capabilities = capabilities })
-
       vim.api.nvim_create_autocmd('LspAttach', {
         callback = function(ev)
           local bufopts = { noremap = true, silent = true, buffer = ev.buf }
           map('n', 'gd', vim.lsp.buf.definition, bufopts)      -- go to definition
-          map('n', 'gD', vim.lsp.buf.declaration, bufopts)     -- go to declaration
-          map('n', 'gr', vim.lsp.buf.references, bufopts)      -- list all references
-          map('n', 'gi', vim.lsp.buf.implementation, bufopts)  -- go to implementation
-          map('n', 'K', vim.lsp.buf.hover, bufopts)            -- show hover documentation
-          map('n', '<leader>rn', vim.lsp.buf.rename, bufopts)  -- rename symbol under cursor
-          map('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)  -- show code actions
-          map('n', '<leader>f', function() vim.lsp.buf.format({ async = true }) end, bufopts)  -- format buffer
-          map('n', '[d', vim.diagnostic.goto_prev, bufopts)    -- jump to previous diagnostic
-          map('n', ']d', vim.diagnostic.goto_next, bufopts)    -- jump to next diagnostic
+          map('n', 'gu', function()                            -- show usages (references)
+            require('telescope.builtin').lsp_references({ includeDeclaration = false })
+          end, bufopts)
+          map('n', 'gr', vim.lsp.buf.rename, bufopts)          -- rename symbol
+          vim.api.nvim_buf_create_user_command(ev.buf, 'Format', function()
+            vim.lsp.buf.format({ async = true })
+          end, { desc = 'Format buffer with LSP' })
         end,
       })
       vim.lsp.config('lua_ls', {
@@ -248,7 +227,7 @@ end
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'c',
   callback = function()
-    map('n', '<leader>c', compile_c, { noremap = true, silent = true, buffer = true, desc = 'Compile C program' })
-    map('n', '<leader>r', run_c, { noremap = true, silent = true, buffer = true, desc = 'Run C program' })
+    vim.api.nvim_buf_create_user_command(0, 'Compile', compile_c, { desc = 'Compile C program' })
+    vim.api.nvim_buf_create_user_command(0, 'Run', run_c, { desc = 'Run C program' })
   end,
 })
