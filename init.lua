@@ -19,6 +19,7 @@ vim.opt.termguicolors = true       -- enable true color support
 vim.opt.signcolumn = 'yes'         -- always show sign column (for lsp diagnostics)
 vim.opt.updatetime = 250           -- faster completion / diagnostics
 
+
 -- hide lsp warnings, warnings are for weak
 vim.diagnostic.config({
   severity_sort = true,
@@ -70,6 +71,23 @@ vim.opt.rtp:prepend(lazypath)
 
 -- plugins
 require('lazy').setup({
+  -- modus-themes colorscheme
+  {
+    'miikanissi/modus-themes.nvim',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require('modus-themes').setup({
+        style = 'modus_vivendi',
+        dim_inactive = true,
+        on_highlights = function(hl, c)
+          hl.Visual = { bg = c.bg_dim }
+        end,
+      })
+      vim.cmd('colorscheme modus')
+    end,
+  },
+
   -- mason
   {
     'williamboman/mason.nvim',
@@ -101,13 +119,17 @@ require('lazy').setup({
       local cmp = require('cmp')
       cmp.setup({
         completion = {
-          completeopt = 'menu,menuone,noinsert',
+          autocomplete = false,
+          completeopt = 'menu,menuone',
         },
         mapping = cmp.mapping.preset.insert({
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<Tab>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+          ['<S-Tab>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
           ['<C-e>'] = cmp.mapping.abort(),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+          ['<CR>'] = cmp.mapping.confirm({ select = false }),
         }),
         sources = cmp.config.sources({
           { name = 'nvim_lsp' },
